@@ -69,7 +69,7 @@
                  ("vector" "vector")
                  ("set" "set" "multiset")
                  ("unordered_set" "unordered_set")
-                 ("queue" "queue")
+                 ("queue" "queue" "priority_queue")
                  ("unordered_map" "unordered_map")
                  ("map" "map")
                  ("stack" "stack")
