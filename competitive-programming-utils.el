@@ -86,6 +86,7 @@
                  ("bitset" "bitset")
                  ("functional" "function")
                  ("deque" "deque")
+                 ("tuple" "tuple")
                  ;; ("multiset" "multiset")
                  ))
       (let ((file (car x)) (regexp (concat "\\_<" (regexp-opt (cdr x)) "\\_>")))
