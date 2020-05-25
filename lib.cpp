@@ -1,3 +1,4 @@
+#include <tuple>
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
@@ -289,13 +290,20 @@ inline bool rand_bool(double prob) {
 
 int timelimit = 10 * 1000, elapsed = 0, margin = 50;
 
-auto start_time = chrono::system_clock::now();
-
-inline int get_elapsed_time() {
+class Timer {
+  chrono::system_clock::time_point start_time = chrono::system_clock::now();
+public:
+  Timer() {}
+  int get_elapsed_time() {
     auto diff = chrono::system_clock::now() - start_time;
     return chrono::duration_cast<chrono::milliseconds>(diff).count();
-}
+  }
+} timer;
 
+// usage:
+while (margin + timer.get_elapsed_time() < timelimit) {
+    // SA loop
+}
 
 // 1D segtree
 
