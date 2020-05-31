@@ -725,3 +725,20 @@ double perimeter(P* p, int n) {
     return ret;
 }
 
+
+// printing __int128
+ostream &operator<<(ostream &out, __int128 x) {
+    bool minus = x < 0;
+    if (x < 0) x = -x;
+    constexpr int bufsize = 42;
+    char buf[bufsize], *p = &buf[bufsize-1];
+    *p = '\0';
+    while (x > 0) {
+        *--p = (x % 10) + '0';
+        x /= 10;
+    }
+    if (minus) out << '-';
+    out << p;
+    return out;
+}
+
