@@ -1,0 +1,25 @@
+class UnionFind {
+    vector<int> par, rank;
+public:
+    explicit UnionFind(int n) : par(n), rank(n, 0) {
+        iota(par.begin(), par.end(), 0);
+    }
+
+    int find(int i) {
+        return (par[i] == i) ? i : (par[i] = find(par[i]));
+    }
+
+    void unite(int i, int j) {
+        int x = find(i), y = find(j);
+        if (x != y) {
+            if (rank[x] < rank[y])
+                par[x] = y;
+            else {
+                par[y] = x;
+                if (rank[x] == rank[y]) rank[x]++;
+            }
+        }
+    }
+
+    bool same(int i, int j) { return find(i) == find(j); }
+};

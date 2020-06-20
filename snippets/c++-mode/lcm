@@ -1,0 +1,5 @@
+long long lcm(long long a, long long b) {
+    long long g = a, h = b;
+    while (h > 0) { long long t = g; g = h; h = t % h; }
+    return a / g * b;
+}

@@ -1,4 +1,5 @@
 #include <tuple>
+#include <map>
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
@@ -244,6 +245,59 @@ public:
     }
 
     bool same(int i, int j) { return find(i) == find(j); }
+};
+
+
+// undo-able union find with weight of each component
+// without path compression
+class UnionFind {
+    int *par, *rank;
+    long long *weight;
+    struct Undo_info {
+        int x, y, rx, ry;
+        long long wx, wy;
+    };
+    map<pair<int, int>, Undo_info> undo_info;
+public:
+    UnionFind(int n, int *x) {
+        par = new int[n];
+        iota(par, par+n, 0);
+        rank = new int[n];
+        fill(rank, rank+n, 1);
+        weight = new long long[n];
+        copy(x, x+n, weight);
+    };
+    int find(int i) {
+        while (par[i] != i) i = par[i];
+        return i;
+    }
+    int same(int i, int j) { return find(i) == find(j); }
+    void unite(int i, int j) {
+        int x = find(i), y = find(j);
+        if (x == y) return;
+        undo_info[make_pair(i, j)] = {x, y, rank[x], rank[y], weight[x], weight[y]};
+        if (rank[x] < rank[y]) {
+            par[x] = y;
+            weight[y] += weight[x];
+        } else {
+            par[y] = x;
+            if (rank[x] == rank[y]) rank[x]++;
+            weight[x] += weight[y];
+        }
+    }
+    void undo(int i, int j) {
+        assert (undo_info.find(make_pair(i, j)) != undo_info.end());
+        Undo_info info = undo_info[make_pair(i, j)];
+        int x = info.x, y = info.y;
+        par[x] = x;
+        par[y] = y;
+        rank[x] = info.rx;
+        rank[y] = info.ry;
+        weight[x] = info.wx;
+        weight[y] = info.wy;
+        undo_info.erase(make_pair(i, j));
+    }
+    long long get_weight(int i) { return weight[find(i)]; }
 };
 
 
