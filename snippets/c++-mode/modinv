@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: modinv
+# key: modinv
+# --
+long long modinv(long long a, long long m) {
+    long long x = m, y = a, p = 1, q = 0, r = 0, s = 1;
+    while (y != 0) {
+        long long u = x / y;
+        long long x0 = y; y = x - y * u; x = x0;
+        long long r0 = p - r * u, s0 = q - s * u;
+        p = r; r = r0; q = s; s = s0;
+    }
+    return q < 0 ? q + m : q;
+}
