@@ -796,3 +796,11 @@ ostream &operator<<(ostream &out, __int128 x) {
     return out;
 }
 
+// bitDP 3^n subset enumeration
+// t \subset s \subset {0..n-1}
+for (int s = 0; s < 1<<n; s++) {
+    for (int t = s; ; t = (t - 1) & s) {
+        // ...
+        if (t == 0) break;
+    }
+}
