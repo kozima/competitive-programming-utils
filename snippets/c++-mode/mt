@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: mt19937
+# key: mt
+# --
+mt19937 mt{ random_device{}() };
