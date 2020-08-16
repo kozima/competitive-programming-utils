@@ -886,3 +886,104 @@ vector<long long> multiply(vector<int> const& a, vector<int> const& b) {
 //         pool[idx].exist = true;
 //     }
 // }
+
+
+// patricia
+// https://atcoder.jp/contests/code-festival-2016-qualb/submissions/15983585
+struct Tree {
+    struct Node {
+        static int serial_id;
+        int id;
+        bool exists = false;
+        int count = 0;
+        Node *children[26];
+        string prefix[26];
+        Node() {
+            fill(children, children+26, nullptr);
+            id = serial_id++;
+        }
+    };
+
+    Node *root;
+    Tree() { root = new Node(); }
+    void add(string &s, int i=0, Node *np=nullptr) {
+        if (np == nullptr) np = root;
+        np->count++;
+        if (np->children[s[i]-'a'] == nullptr) {
+            Node *ch = new Node();
+            np->children[s[i]-'a'] = ch;
+            np->prefix[s[i]-'a'] = s.substr(i);
+            ch->exists = true;
+            ch->count = 1;
+        } else {
+            Node *ch = np->children[s[i] - 'a'];
+            string &pref = np->prefix[s[i] - 'a'];
+            int cp = 0;
+            while (i + cp < s.size() && cp < pref.size()) {
+                if (s[i + cp] != pref[cp]) break;
+                else cp++;
+            }
+            if (cp == pref.size()) {
+                if (i + cp == s.size()) {
+                    ch->exists = true;
+                    ch->count++;
+                } else
+                    add(s, i + cp, ch);
+            } else {
+                Node *mid = new Node();
+                mid->children[pref[cp] - 'a'] = ch;
+                mid->prefix[pref[cp] - 'a'] = pref.substr(cp);
+                np->children[s[i] - 'a'] = mid;
+                np->prefix[s[i] - 'a'] = s.substr(i, cp);
+                mid->count = 1 + ch->count;
+                if (i + cp == s.size()) {
+                    mid->exists = true;
+                } else {
+                    Node *leaf = new Node();
+                    leaf->exists = true;
+                    leaf->count = 1;
+                    mid->children[s[i + cp] - 'a'] = leaf;
+                    mid->prefix[s[i + cp] - 'a'] = s.substr(i + cp);
+                }
+            }
+        }
+    }
+
+    int calc_rank(const string &s, const string &p) {
+        int ans = 0;
+        Node *nd = root;
+        for (int i = 0; i < s.size();) {
+            // cerr << s << " " << i << " " << nd->id << endl;
+            for (int j = 0; s[i] != p[j]; j++) {
+                Node *ch = nd->children[p[j] - 'a'];
+                if (ch != nullptr) ans += ch->count;
+            }
+            Node *ch = nd->children[s[i] - 'a'];
+            i += nd->prefix[s[i] - 'a'].size();
+            nd = ch;
+            if (nd->exists) ans++;
+        }
+        return ans;
+    }
+
+    void dump(Node *nd=nullptr) {
+        if (nd == nullptr) nd = root;
+        cerr << "Node id = " << nd->id << endl;
+        cerr << (nd->exists ? "Exist" : "Not exist") << "; count = " << nd->count << endl;
+        cerr << "children = ";
+        for (int i = 0; i < 26; i++) {
+            Node *ch = nd->children[i];
+            cerr << " " << (ch == nullptr ? -1 : ch->id);
+        }
+        cerr << endl;
+        cerr << "prefix = ";
+        for (int i = 0; i < 26; i++) {
+            cerr << "; " << nd->prefix[i];
+        }
+        cerr << endl;
+        for (int i = 0; i < 26; i++) {
+            Node *ch = nd->children[i];
+            if (ch != nullptr) dump(ch);
+        }
+    }
+};
