@@ -22,7 +22,15 @@ public:
         if (facti) delete[] facti;
     }
 
-    long long get(int n, int k) const {
+    long long getFact(int n) const {
+        return fact[n];
+    }
+
+    long long getFactInv(int n) const {
+        return facti[n];
+    }
+
+    long long getComb(int n, int k) const {
         if (n < 0 || k < 0 || k > n) return 0;
         return fact[n] * facti[k] % mod * facti[n-k] % mod;
     }
@@ -31,4 +39,4 @@ public:
         if (n < 0 || k < 0 || k > n) return 0;
         return fact[n] * facti[n-k] % mod;
     }
-};
+}
