@@ -452,56 +452,67 @@ public:
 // 1D segtree with lazy propagation
 
 class SegTreeLazy {
-    using T = long long int;
-    static const T op(const T& lhs, const T& rhs) { // binary operator***
-        return lhs + rhs;
+    // monoid and action
+    using D = long long int;
+    using A = long long int;
+    static D unitD() { return numeric_limits<D>::max(); }
+    static A unitA() { return 0; }
+    static const D compose(const D& lhs, const D& rhs) {
+        return min(lhs, rhs);
     }
-    constexpr static T unit = 0; // unit***
-    const int N;
-    T *data, *delay;
-    int calc_size(int n) { int ret = 1; while (n > ret) ret *= 2; return ret; }
+    static const D applyA(const A& a, const D& x, int l, int r) {
+        return a + x;
+    }
+    static const A appendA(const A& a, const A& b) {
+        return a + b;
+    }
+    // ---
+
     void force(int i, int l, int r) {
-        if (delay[i]) {
-            data[i] += delay[i] * (r - l); // force***
+        if (delay[i] != unitA()) {
+            data[i] = applyA(delay[i], data[i], l, r);
             if (r - l > 1) {
-                delay[2*i+1] += delay[i];
-                delay[2*i+2] += delay[i];
+                delay[2*i+1] = appendA(delay[i], delay[2*i+1]);
+                delay[2*i+2] = appendA(delay[i], delay[2*i+2]);
             }
-            delay[i] = 0;
+            delay[i] = unitA();
         }
     }
+    const int N;
+    D *data;
+    A *delay;
+    int calc_size(int n) { int ret = 1; while (n > ret) ret *= 2; return ret; }
 public:
     explicit SegTreeLazy(int n) : N(calc_size(n)) {   // [0, n-1]
-        data = new T[2*N-1]();
-        delay = new T[2*N-1]();
+        data = new D[2*N-1]();
+        delay = new A[2*N-1]();
     }
     ~SegTreeLazy() { delete[] data; delete[] delay; }
-    T query(int a, int b, int i = -1, int l = -1, int r = -1) {
+    D query(int a, int b, int i = -1, int l = -1, int r = -1) {
         if (i == -1) { i = 0; l = 0; r = N; }
-        if (r <= a || b <= l) return unit;
+        if (r <= a || b <= l) return unitD();
         force(i, l, r);
         if (a <= l && r <= b) return data[i];
-        const int m = (l+r)/2;
         if (r - l == 1) return data[i];
+        const int m = (l+r)/2;
         if (b <= m) return query(a, b, 2*i+1, l, m);
         if (m <= a) return query(a, b, 2*i+2, m, r);
-        T v1 = query(a, b, 2*i+1, l, m),
-            v2 = query(a, b, 2*i+2, m, r);
-        return op(v1, v2);
+        D v1 = query(a, b, 2*i+1, l, m), v2 = query(a, b, 2*i+2, m, r);
+        return compose(v1, v2);
     }
-    void add(int a, int b, T v, int i = -1, int l = -1, int r = -1) {
+    void add(int a, int b, A v, int i = -1, int l = -1, int r = -1) {
         if (i == -1) { i = 0; l = 0; r = N; }
         if (r <= a || b <= l) return;
-        if (a <= l && r <= b) { delay[i] += v; force(i, l, r); return; }
+        if (a <= l && r <= b) { delay[i] = appendA(v, delay[i]); force(i, l, r); return; }
         add(a, b, v, 2*i+1, l, (l+r)/2); force(2*i+1, l, (l+r)/2);
         add(a, b, v, 2*i+2, (l+r)/2, r); force(2*i+2, (l+r)/2, r);
-        data[i] = op(data[2*i+1], data[2*i+2]);
+        data[i] = compose(data[2*i+1], data[2*i+2]);
     }
-    // T get(int i) { return query(i, i+1); }
-    void init(int *a, int n) {
+    void init(D *a, int n) {
         for (int i = 0; i < n; i++) data[i+N-1] = a[i];
-        for (int i = N-2; i >= 0; i--) data[i] = op(data[2*i+1], data[2*i+2]);
+        for (int i = N-2; i >= 0; i--) data[i] = compose(data[2*i+1], data[2*i+2]);
     }
+    // D get(int i) { return query(i, i+1); }
     // void update(int i, T v) {
     //     int ov = get(i);
     //     add(i, i+1, v-ov); // BEWARE: assumes add is `+'
