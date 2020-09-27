@@ -1,3 +1,4 @@
+#include <functional>
 #include <tuple>
 #include <map>
 #include <algorithm>
@@ -1004,5 +1005,55 @@ struct Tree {
             Node *ch = nd->children[i];
             if (ch != nullptr) dump(ch);
         }
+    }
+};
+
+
+// bipartite matching; slower than atcoder lib.
+class BipartiteMatching {
+    const int N, M;
+    vector<vector<int> > adj;
+    vector<int> match;
+public:
+    BipartiteMatching(int n, int m) : N(n), M(m) {
+        adj.resize(m+n);
+        match.resize(m+n, -1);
+    }
+    void add_edge(int i, int j) {
+        assert(0 <= i);
+        assert(i < N);
+        assert(0 <= j);
+        assert(j < M);
+        adj[i].push_back(j+N);
+        adj[j+N].push_back(i);
+    }
+    vector<pair<int, int> > matching() {
+        vector<pair<int, int> > result;
+        vector<bool> visited(N+M, false);
+        function<bool(int)> dfs = [&](int i) {
+            visited[i] = true;
+            for (int j : adj[i]) {
+                if (visited[j]) continue;
+                visited[j] = true;
+                if (match[j] == -1 || dfs(match[j])) {
+                    match[i] = j;
+                    match[j] = i;
+                    return true;
+                }
+            }
+            return false;
+        };
+        for (;;) {
+            bool found = false;
+            fill(visited.begin(), visited.end(), false);
+            for (int i = 0; i < N; i++) {
+                if (match[i] >= 0) continue;
+                if (dfs(i)) { found = true; break; }
+            }
+            if (!found) break;
+        }
+        for (int i = 0; i < N; i++)
+            if (match[i] >= 0) result.push_back({i, match[i]-N});
+        return result;
     }
 };
