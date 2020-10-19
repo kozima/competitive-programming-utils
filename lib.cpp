@@ -415,6 +415,43 @@ public:
 
 // dynamic segtree
 
+
+class tree {
+    static const long long min_idx= 0, max_idx = 1e12;
+    struct T {
+        double a, b;
+    };
+    T op(T x, T y) { return {x.a * y.a, x.b * y.a + y.b}; }
+    T unit() { return { 1, 0 }; }
+ 
+    tree *left = nullptr, *right = nullptr;
+    T prod = unit();
+public:
+    tree() {}
+    void update(long long x, T t, long long l = min_idx, long long r = max_idx+1) {
+        if (r - l > 1) {
+            if ((l + r) / 2 > x) {
+                if (left == nullptr) left = new tree();
+                left->update(x, t, l, (l + r) / 2);
+            } else {
+                if (right == nullptr) right = new tree();
+                right->update(x, t, (l + r) / 2, r);
+            }
+ 
+            if (left == nullptr) {
+                prod = right->prod;
+            } else if (right == nullptr) {
+                prod = left->prod;
+            } else {
+                prod = op(left->prod, right->prod);
+            }
+        } else {
+            prod = t;
+        }
+    }
+    T getallprod() { return prod; }
+};
+
 class tree {
     constexpr int MAX = 1e9;
     tree *left = nullptr, *right = nullptr;
@@ -1057,3 +1094,59 @@ public:
         return result;
     }
 };
+
+
+// Z algorithm
+vector<int> z(string &s) {
+    const int n = s.size();
+    vector<int> ret(n, 0);
+    ret[0] = n;
+    int l, r = 1;
+    for (int i = 1; i < n; i++) {
+        if (i >= r) {
+            int j = 0;
+            while (i + j < n && s[j] == s[i + j]) j++;
+            l = i; r = i + j;
+            ret[i] = j;
+        } else {
+            int k = ret[i - l];
+            if (k < r - i) ret[i] = k;
+            else {
+                int j = r - i;
+                while (i + j < n && s[j] == s[i + j]) j++;
+                l = i; r = i + j;
+                ret[i] = j;
+            }
+        }
+    }
+    return ret;
+}
+
+
+// 関節点 articulation points
+vector<int> articulation_points(vector<vector<int>> &adj) {
+    const int n = adj.size();
+    vector<int> disc(n, -1), low(n);
+    vector<int> aps;
+    int counter = 0;
+    function<void(int, int)> dfs = [&](int i, int p) {
+        disc[i] = low[i] = counter++;
+        bool is_ap = false;
+        int ccount = 0;
+        for (int j : adj[i]) {
+            if (j == p) continue;
+            if (disc[j] == -1) {
+                dfs(j, i);
+                low[i] = min(low[i], low[j]);
+                ccount++;
+                if (p >= 0 && low[j] >= disc[i]) is_ap = true;
+            } else {
+                low[i] = min(low[i], disc[j]);
+            }
+        }
+        if (is_ap || p == -1 && ccount > 1) aps.push_back(i);
+    };
+    for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i, -1);
+    sort(aps.begin(), aps.end());
+    return aps;
+}
