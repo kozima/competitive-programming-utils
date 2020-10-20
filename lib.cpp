@@ -1150,3 +1150,30 @@ vector<int> articulation_points(vector<vector<int>> &adj) {
     sort(aps.begin(), aps.end());
     return aps;
 }
+
+
+// bridges
+vector<pair<int, int> > bridges(vector<vector<int>> &adj) {
+    const int n = adj.size();
+    vector<int> disc(n, -1), low(n);
+    vector<pair<int, int> > bs;
+    int counter = 0;
+    function<void(int, int)> dfs = [&](int i, int p) {
+        disc[i] = low[i] = counter++;
+        bool is_ap = false;
+        int ccount = 0;
+        for (int j : adj[i]) {
+            if (j == p) continue;
+            if (disc[j] == -1) {
+                dfs(j, i);
+                low[i] = min(low[i], low[j]);
+                ccount++;
+            } else {
+                low[i] = min(low[i], disc[j]);
+            }
+            if (low[j] > disc[i]) bs.emplace_back(i, j);
+        }
+    };
+    for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i, -1);
+    return bs;
+}
