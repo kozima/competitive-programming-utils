@@ -1,7 +1,11 @@
-class UnionFind {
+# -*- mode: snippet -*-
+# name: union-find
+# key: DSU
+# --
+class DSU {
     vector<int> par, rank;
 public:
-    explicit UnionFind(int n) : par(n), rank(n, 0) {
+    explicit DSU(int n) : par(n), rank(n, 0) {
         iota(par.begin(), par.end(), 0);
     }
 

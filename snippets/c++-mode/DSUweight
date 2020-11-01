@@ -1,0 +1,38 @@
+# -*- mode: snippet -*-
+# name: weighted union-find
+# key: DSUW
+# --
+class DSU {
+    using T = int;
+    static T op(T x, T y) { return x + y; }
+    static T init(int) { return 1; }
+
+    vector<T> w;
+    vector<int> par, rank;
+public:
+    DSU(int n) : par(n), rank(n, 0) {
+        iota(par.begin(), par.end(), 0);
+        w.reserve(n);
+        for (int i = 0; i < n; i++) w.push_back(init(i));
+    }
+
+    int find(int i) {
+        return (par[i] == i) ? i : (par[i] = find(par[i]));
+    }
+
+    void unite(int i, int j) {
+        int x = find(i), y = find(j);
+        if (x != y) {
+            if (rank[x] < rank[y]) {
+                par[x] = y;
+                w[y] = op(w[x], w[y]);
+            } else {
+                par[y] = x;
+                w[x] = op(w[x], w[y]);
+                if (rank[x] == rank[y]) rank[x]++;
+            }
+        }
+    }
+
+    T weight(int i) { return w[find(i)]; }
+}

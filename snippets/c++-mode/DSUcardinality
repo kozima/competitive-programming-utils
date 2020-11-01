@@ -1,0 +1,31 @@
+# -*- mode: snippet -*-
+# name: union-find + cardinality
+# key: DSUC
+# --
+class DSU {
+    vector<int> par, rank, size;
+public:
+    DSU(int n) : par(n), rank(n, 0), size(n, 1) {
+        iota(par.begin(), par.end(), 0);
+    }
+
+    int find(int i) {
+        return (par[i] == i) ? i : (par[i] = find(par[i]));
+    }
+
+    void unite(int i, int j) {
+        int x = find(i), y = find(j);
+        if (x != y) {
+            if (rank[x] < rank[y]) {
+                par[x] = y;
+                size[y] += size[x];
+            } else {
+                par[y] = x;
+                size[x] += size[y];
+                if (rank[x] == rank[y]) rank[x]++;
+            }
+        }
+    }
+
+    int card(int i) { return size[find(i)]; }
+};

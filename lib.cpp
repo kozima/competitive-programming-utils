@@ -376,6 +376,7 @@ class SegTree {
         return max(lhs, rhs);
     }
     constexpr static T unit = -1LL<<60; // unit element
+
     const int N;
     T *data;
     static int calc_size(int sz) {
