@@ -1,3 +1,4 @@
+#include <stack>
 #include <functional>
 #include <tuple>
 #include <map>
@@ -1177,4 +1178,40 @@ vector<pair<int, int> > bridges(vector<vector<int>> &adj) {
     };
     for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i, -1);
     return bs;
+}
+
+// SCC
+// returns: node -> index of its component
+vector<int> scc(const vector<vector<int>> &adj) {
+    const int n = adj.size();
+    vector<int> low(n), disc(n, -1), comp(n);
+    vector<bool> finished(n, false);
+    stack<int> st;
+    int count = 0, cidx = 0;
+    function<void(int)> dfs = [&](int i) {
+        low[i] = disc[i] = count++;
+        st.push(i);
+        for (int j : adj[i]) {
+            if (disc[j] == -1) {
+                dfs(j);
+                low[i] = min(low[i], low[j]);
+            } else if (!finished[j]) {
+                low[i] = min(low[i], disc[j]);
+            }
+        }
+
+        if (low[i] == disc[i]) {
+            for (;;) {
+                int x = st.top();
+                st.pop();
+                finished[x] = true;
+                comp[x] = cidx;
+                if (x == i) break;
+            }
+            cidx++;
+        }
+    };
+    for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i);
+
+    return comp;
 }
