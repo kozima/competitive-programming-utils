@@ -1,3 +1,4 @@
+#include <cassert>
 #include <chrono>
 
 unsigned int xor128() {
@@ -11,6 +12,18 @@ inline bool rand_bool(double prob) {
     constexpr double x = 1LL<<32; // uint_max+1
     return xor128() < prob * x;
 }
+
+inline bool rand_bool() {
+    return xor128() < 1u<<31;
+}
+
+inline double rand(double lb, double ub) {
+    assert(lb < ub);
+    unsigned int x = xor128();
+    return lb + (ub - lb) * x / double(1LL<<32);
+}
+
+inline int rand_int(int n) { return xor128()%n; }
 
 int timelimit = 10 * 1000, elapsed = 0, margin = 50;
 
