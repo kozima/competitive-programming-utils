@@ -1053,10 +1053,25 @@ class BipartiteMatching {
     const int N, M;
     vector<vector<int> > adj;
     vector<int> match;
+    vector<bool> visited;
+    bool dfs(int i) {
+        visited[i] = true;
+        for (int j : adj[i]) {
+            if (visited[j]) continue;
+            visited[j] = true;
+            if (match[j] == -1 || dfs(match[j])) {
+                match[i] = j;
+                match[j] = i;
+                return true;
+            }
+        }
+        return false;
+    }
 public:
     BipartiteMatching(int n, int m) : N(n), M(m) {
         adj.resize(m+n);
         match.resize(m+n, -1);
+        visited.resize(m+n);
     }
     void add_edge(int i, int j) {
         assert(0 <= i);
@@ -1068,20 +1083,6 @@ public:
     }
     vector<pair<int, int> > matching() {
         vector<pair<int, int> > result;
-        vector<bool> visited(N+M, false);
-        function<bool(int)> dfs = [&](int i) {
-            visited[i] = true;
-            for (int j : adj[i]) {
-                if (visited[j]) continue;
-                visited[j] = true;
-                if (match[j] == -1 || dfs(match[j])) {
-                    match[i] = j;
-                    match[j] = i;
-                    return true;
-                }
-            }
-            return false;
-        };
         for (;;) {
             bool found = false;
             fill(visited.begin(), visited.end(), false);
@@ -1215,3 +1216,101 @@ vector<int> scc(const vector<vector<int>> &adj) {
 
     return comp;
 }
+
+
+// fast zeta/Moebius transform
+template<typename T, bool dual=false, bool inverse=false>
+void zeta_transform(vector<T>& f) {
+    const int n = f.size();
+    for (int i = 0; (1 << i) < n; i++)
+        for (int s = 0; s < n; s++)
+            if constexpr (dual) {
+                if (!((s >> i) & 1)) {
+                    if constexpr (inverse) f[s] = f[s] - f[s^(1<<i)];
+                    else f[s] = f[s] + f[s^(1<<i)];
+                }
+            } else {
+                if ((s >> i) & 1) {
+                    if constexpr (inverse) f[s] = f[s] - f[s^(1<<i)];
+                    else f[s] = f[s] + f[s^(1<<i)];
+                }
+            }
+}
+
+template<typename T>
+void (*subset_zeta)(vector<T>&) = zeta_transform<T, false, false>;
+
+template<typename T>
+void (*supset_zeta)(vector<T>&) = zeta_transform<T, true, false>;
+
+template<typename T>
+void (*subset_moebius)(vector<T>&) = zeta_transform<T, false, true>;
+
+template<typename T>
+void (*supset_moebius)(vector<T>&) = zeta_transform<T, true, true>;
+
+// check
+/*
+set<int> op(set<int>& a, set<int>& b) {
+    set<int> ret = b;
+    for (int x : a) ret.insert(x);
+    return ret;
+}
+
+set<int> inv(set<int>& a, set<int>& b) {
+    set<int> ret = a;
+    for (int x : b) ret.erase(x);
+    return ret;
+}
+
+class TestVal : public set<int> {
+
+};
+
+TestVal operator+(TestVal& lhs, TestVal& rhs) {
+    TestVal ret = lhs;
+    for (int x : rhs) ret.insert(x);
+    return ret;
+}
+
+TestVal operator-(TestVal& lhs, TestVal& rhs) {
+    TestVal ret = lhs;
+    for (int x : rhs) ret.erase(x);
+    return ret;
+}
+
+void test1(int n) {
+    vector<TestVal> v(1<<n);
+    for (int i = 0; i < v.size(); i++) v[i].insert(i);
+    subset_zeta<TestVal>(v);
+    for (int i = 0; i < v.size(); i++)
+        for (int j = 0; j < v.size(); j++)
+            assert((v[i].find(j) != v[i].end()) == ((i & j) == j));
+
+    subset_moebius<TestVal>(v);
+    for (int i = 0; i < v.size(); i++)
+        for (int j = 0; j < v.size(); j++)
+            assert((v[i].find(j) != v[i].end()) == (i == j));
+}
+
+void test2(int n) {
+    vector<TestVal> v(1<<n);
+    for (int i = 0; i < v.size(); i++) v[i].insert(i);
+    supset_zeta<TestVal>(v);
+    for (int i = 0; i < v.size(); i++)
+        for (int j = 0; j < v.size(); j++)
+            assert((v[i].find(j) != v[i].end()) == ((i & j) == i));
+
+    supset_moebius<TestVal>(v);
+    for (int i = 0; i < v.size(); i++)
+        for (int j = 0; j < v.size(); j++)
+            assert((v[i].find(j) != v[i].end()) == (i == j));
+}
+
+int main() {
+    for (int i = 1; i < 12; i++) {
+        test1(i);
+        test2(i);
+    }
+}
+*/
