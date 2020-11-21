@@ -35,4 +35,4 @@ public:
     }
 
     T weight(int i) { return w[find(i)]; }
-}
+};
