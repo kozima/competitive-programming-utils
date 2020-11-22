@@ -1314,3 +1314,27 @@ int main() {
     }
 }
 */
+
+// determinant of matrix m mod M; m is modified
+int det_mod(vector<vector<int> >& m) {
+    long long result = 1;
+    const int n = m.size();
+    for (int i = 0; i < n; i++) {
+        int j = i;
+        while (j < n && m[j][i] == 0) j++;
+        if (j == n) return 0;
+        m[i].swap(m[j]);
+        result = result * m[i][i] % M;
+        const long long mult = modinv(m[i][i], M);
+        for (int k = i + 1; k < n; k++) {
+            if (const int v = m[k][i]; v != 0) {
+                for (int j = i; j < n; j++) {
+                    m[k][j] -= m[i][j] * mult % M * v % M;
+                    m[k][j] %= M;
+                    if (m[k][j] < 0) m[k][j] += M;
+                }
+            }
+        }
+    }
+    return result;
+}
