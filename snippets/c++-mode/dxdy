@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: dxdy
+# key: dxdy
+# --
+const pair<int, int> dxdy[] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};

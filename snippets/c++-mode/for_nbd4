@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: for_nbd4
+# key: nbd
+# --
+template<typename Callback>
+void for_nbd4(int x, int y, int lx, int ux, int ly, int uy, Callback f) {
+    constexpr pair<int, int> dxdy[] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+    for (auto [dx, dy] : dxdy) {
+        const int u = x + dx, v = y + dy;
+        if (lx <= u && u < ux && ly <= v && v < uy) f(u, v);
+    }
+}
+template<typename Callback>
+void for_nbd4(int x, int y, int X, int Y, Callback f) {
+    for_nbd4(x, y, 0, X, 0, Y, f);
+}
