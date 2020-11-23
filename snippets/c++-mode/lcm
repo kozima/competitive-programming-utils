@@ -1,4 +1,6 @@
 long long lcm(long long a, long long b) {
+    if (a < 0) a = -a;
+    if (b < 0) b = -b;
     long long g = a, h = b;
     while (h > 0) { long long t = g; g = h; h = t % h; }
     return a / g * b;
