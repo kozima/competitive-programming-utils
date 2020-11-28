@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: sum_n_x^n
+# key: sum
+# --
+long long sum_n_xn(long long n, long long x, int M) {
+    if (x >= M) x %= M;
+    if (n >= M) n %= M;
+    return ((x * n - n - 1) * modexp(x, n+1, M) % M + x) % M * modexp(x-1, M-3, M) % M;
+}
