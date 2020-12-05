@@ -1,0 +1,69 @@
+\documentclass{scrartcl}
+\usepackage{url}
+\usepackage{amsmath,amsthm}
+\usepackage[all]{xy}
+
+\theoremstyle{definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}[lemma]{Example}
+
+\begin{document}
+
+\section{木の直径について}
+
+木の直径は任意の点からDFSを二回することで求められることが知られている．これの一般化を考える．
+
+$T$を木とする．以下パスの向きは区別しないことにする．
+$P$を$T$のパス全体の集合，$X$を全順序集合とし，$f: P \to X$が与えられているとする．
+このとき，$\max_{\pi \in P} f(\pi)$を求める問題を考える．
+
+何の条件もないと無理があるので$f$が以下の条件を満たすことを仮定してみる．
+\begin{itemize}
+\item $f(\pi \cdot \pi') \ge \max(f(\pi), f(\pi'))$
+\item $f(\pi) \le f(\pi') \implies f(\pi \cdot \pi'') \le f(\pi' \cdot \pi'')
+  \text{ and } f(\pi'' \cdot \pi) \le f(\pi'' \cdot \pi')$
+\end{itemize}
+ただし$\pi, \pi' \in P$に対して$\pi \cdot \pi'$はパスの連結であり，
+$\pi$と$\pi'$が一つの端点のみを共有するときに限り定義される．
+
+\begin{example}
+  $f(\pi)$を$\pi$に含まれる辺の本数とすると，これは直径を求める問題である．
+\end{example}
+
+\begin{example}
+  各頂点$i$に重み$w_i$が与えられているとする．$f(\pi)$を$\pi$に現れる頂点の重み和とすれば，パスの重み和の最大値を求める問題になる．
+\end{example}
+
+以下，頂点$u, v$を結ぶパスを単に$uv$と書く．パスの向きは気にしないので$uv=vu$であることに注意．
+
+\begin{lemma}
+  頂点$v$を任意にとり，$f(vw)$を最大化する$w$をひとつとる．また，$x, y$は$f$を最大化するあるパスの両端点とする．このとき$f(xy) = f(wx) = f(wy)$が成り立つ．
+\end{lemma}
+\begin{proof}
+  $xy$-pathに含まれる頂点$u$で$f(vu)$を最小にするものをとる．
+  このとき$ux$と$uy$は$u$以外の頂点を共有せず，下図のような状況になる．
+  \begin{displaymath}
+    \xymatrix{
+      w \ar@{-}[r]& v \\
+      x \ar@{-}[r]& u \ar@{-}[u] \ar@{-}[r] & y
+    }
+  \end{displaymath}
+  $w$のとり方から
+  \begin{displaymath}
+    f(wu) = f(wv \cdot vu) \ge f(wv) \ge f(vx)
+  \end{displaymath}
+  である．よって
+  \begin{displaymath}
+    f(wx) = f(wu \cdot ux) \ge f(yu \cdot ux) = f(yx)
+  \end{displaymath}
+  がいえる．逆向きの不等式は$xy$の選び方から明らかに成り立つから$f(wx) = f(yx)$である．
+  $f(wy) = f(yx)$も同様に成り立つ．
+\end{proof}
+
+$v$を与えたとき，$\max_u f(vu)$を与える$u$はDFSにより求めることができる\footnote{$f$の性質が悪いと$O(|T|)$では求まらないかもしれない．}．上の事実より，こうして求めた$u$は$f$を最大にするパスの端点になるので，$u$を始点としてもう一度DFSをすれば$f$の最大値を求めることができる．
+
+\subsection*{備考}
+
+ARC097-F Monochrome Cat \url{https://atcoder.jp/contests/arc097/tasks/arc097_d}
+
+\end{document}
