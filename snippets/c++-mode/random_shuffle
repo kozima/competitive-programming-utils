@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: random_shuffle
+# key: shuffle
+# --
+template<typename T>
+void random_shuffle(vector<T> &a) {
+    mt19937 mt{ random_device{}() };
+    for (int i = a.size() - 1; i >= 1; i--) {
+        uniform_int_distribution<int> dist(0, i);
+        int j = dist(mt);
+        if (i != j) swap(a[i], a[j]);
+    }
+}
