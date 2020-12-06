@@ -43,7 +43,7 @@ $\pi$と$\pi'$が一つの端点のみを共有するときに限り定義され
   頂点$v$を任意にとり，$f(vw)$を最大化する$w$をひとつとる．また，$x, y$は$f$を最大化するあるパスの両端点とする．このとき$f(xy) = f(wx) = f(wy)$が成り立つ．
 \end{lemma}
 \begin{proof}
-  $xy$-pathに含まれる頂点$u$で$f(vu)$を最小にするものをとる．
+  $xy$-pathに含まれる頂点$u$で$v$から最も近いものをとる．
   このとき$ux$と$uy$は$u$以外の頂点を共有せず，下図のような状況になる．
   \begin{displaymath}
     \xymatrix{
@@ -53,7 +53,7 @@ $\pi$と$\pi'$が一つの端点のみを共有するときに限り定義され
   \end{displaymath}
   $w$のとり方から
   \begin{displaymath}
-    f(wu) = f(wv \cdot vu) \ge f(wv) \ge f(vx)
+    f(wu) = f(wv \cdot vu) \ge f(wv) \ge f(yv) \ge f(yu)
   \end{displaymath}
   である．よって
   \begin{displaymath}
