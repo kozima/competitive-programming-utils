@@ -1,11 +1,14 @@
 \documentclass{scrartcl}
 \usepackage{url}
-\usepackage{amsmath,amsthm}
+\usepackage{amsmath,amsthm,amssymb,stmaryrd}
+\usepackage{ascmac,fancybox}
 \usepackage[all]{xy}
 
 \theoremstyle{definition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{example}[lemma]{Example}
+\newtheorem*{problem}{Problem}
+\newtheorem*{solution}{Solution}
 
 \begin{document}
 
@@ -65,5 +68,195 @@ $v$を与えたとき，$\max_u f(vu)$を与える$u$はDFSにより求めるこ
 \subsection*{備考}
 
 ARC097-F Monochrome Cat \url{https://atcoder.jp/contests/arc097/tasks/arc097_d}
+
+\section{辞書順最小文字列}
+
+\newcommand{\cle}{\sqsubseteq}
+\newcommand{\clt}{\sqsubset}
+\newcommand{\ceq}{\approx}
+\newcommand{\bag}[1]{\lbag#1\rbag}
+
+以下の解法が正しいことの詳しい証明が見つけられなかったので自分で考えてみた．
+\footnote{もっと簡単な証明があるのではないかと思う．}
+
+\begin{screen}
+  \begin{problem}
+    文字列の列$s_1, \dots, s_n$が与えられたとき，これらを任意の順番で結合してできる文字列のうち辞書順最小のものを求めよ．
+  \end{problem}
+  \begin{solution}
+    文字列$s, t$について$s \cle t \iff st \le ts$と定義する．ただし$\le$は辞書式順序である．
+    このとき
+    \begin{enumerate}
+    \item $\cle$は空でない文字列全体の集合の上のtotal preorderになる．
+    \item $s_1, \dots, s_n$を並べ替えて得られる列$t_1, \dots, t_n$で$t_1 \cle \dots \cle t_n$を満たすものをとると，これらを順に連結してできる$t_1\dots t_n$は$t$の選び方によらず同じ文字列になり，これが辞書順最小である．
+    \end{enumerate}
+  \end{solution}
+\end{screen}
+
+\subsection{Total preorderであることの証明}
+
+反射性は明らかである．また$\le$がtotalなので$\cle$もtotalである．
+推移性を示す．
+
+\begin{lemma}
+  文字列$s,t$と正整数$m,n$が$s^m = t^n$を満たすなら，
+  $g = \gcd(m,n)$として$s, t$は長さ$g$の共通周期をもつ．
+  すなわちある長さ$g$の文字列$p$と正整数$k, l$があって
+  $s = p^k, t = p^l$と書ける．
+\end{lemma}
+\begin{proof}
+  $1 \le i \le mn$に対して$(s^n)_i = (t^m)_i$が成り立つので，
+  $s_{i \bmod m} = t_{i \bmod n}$がすべての$i$で成り立つ．
+  $g = \gcd(m,n)$とすると，中国剰余定理より$x \equiv y \pmod g$のとき
+  $s_x = t_y$であることがわかる．このことから$s, t$はいずれも周期$g$の
+  文字列であることがわかる（つまり$s_i = s_{i+g}$かつ$t_j = t_{j+g}$）．
+  $p$として$s$の長さ$g$の接頭辞をとればよい．
+\end{proof}
+より代数的な証明．
+\begin{proof}
+  $u = s^m = t^n$とし，$I = \{ k \in \mathbb Z \mid \forall i, u_i = u_{i+k}\}$
+  と定義する．
+  ただし$u_{x \bmod mn}$を単に$u_x$と書いた．
+  $I$は$\mathbb Z$のイデアルであり，$m, n \in I$である．よって
+  $g = \gcd(m,n)$とすると$g \in I$であるが，
+  これは$u$が周期$g$の文字列であることを意味する．
+\end{proof}
+
+
+$s \cle t$かつ$t \cle s$のとき$s \ceq t$と書くことにする．
+これは$st = ts$と同値である．
+\begin{lemma}
+  $s \ceq t$ならば$s$と$t$は共通周期をもつ．
+\end{lemma}
+\begin{proof}
+  $|s| = m$, $|t| = n$とする．
+  $st = ts$なので$s^nt^m = t^ms^n$である．両辺の長さ$mn$の接頭辞をとると
+  $s^n = t^m$であることがわかる．よって$s$と$t$は共通の周期を持つ．
+\end{proof}
+
+以下，$s \cle t$だが$s \ceq t$ではないとき（すなわち$st < ts$のとき）
+$s \clt t$と書く．
+
+\begin{lemma}
+  $s \clt t \clt u \clt s$となることはない．
+\end{lemma}
+\begin{proof}
+  $|s| + |t| + |u|$に関する帰納法で示す．
+
+  $s, t, u$の共通prefixがいずれの文字列よりも真に短い場合は，
+  共通prefixの長さを$l$として$l+1$番目の文字を比較すれば，$s_{l+1} < u_{l+1}
+  \le s_{l+1}$となって矛盾が導かれる．
+
+  $s, t, u$の共通prefixがいずれかの文字列に一致する場合を考える．
+  $s$が共通prefixであるとしてよい．
+  \begin{enumerate}
+  \item $t, u$のいずれも他方のprefixとならないとき．
+    最初に一致しない位置を$i$とすれば，$i > |s|$でなければならない．
+    また$t \clt u$だから$t_i < u_i$である．よって$t < u$である．
+    ゆえに$st < ts < us < su$となる．$st$と$su$の最初の$|s|+i-1$文字は
+    一致しているから，$ts$と$us$の最初の$|s|+i-1$文字も一致しなければならない．
+    特に両者の$i$文字目が一致しなければならないが，これは$t_i = u_i$を意味し，
+    $i$の選び方と矛盾する．
+  \item $t$が$u$のprefixであるとき．$t = st'$, $u = st'u'$と書く．
+    \begin{itemize}
+    \item $s \clt t$より$st < ts$である．よって$st' < t's$．
+    \item $u \clt s$より$us < su$である．よって$t'u's < st'u'$．
+    \end{itemize}
+    これらを合わせると$t'u's < st'u' < t'su'$がいえる．両辺の共通prefix
+    である$t'$を除去して$u's < su'$を得る．
+
+    さらに，$t \clt u$から$st'u' < u'st'$がいえるので，
+    $st'u' < su't'$である．よって$t'u' < u't'$である．
+    したがって$s \clt t'$, $t' \clt u'$, $u' \clt s$となるが，
+    $|s| + |t'| + |u'| < |s| + |t| + |u|$だから，帰納法の仮定から
+    このような$s, t', u'$は存在しない．
+  \item $u$が$t$のprefixであるとき．$t = su't'$, $u = su'$と書く．
+    \begin{itemize}
+    \item $s \clt t$より$su't' < u't's$．
+    \item $u \clt s$より$u's < su'$．
+    \end{itemize}
+    これらを合わせると$u'st' < su't' < u't's$がいえるので，$st' < t's$である．
+
+    さらに，$t \clt u$から$t'su' < su't'$がいえるので，
+    $st'u' < su't'$である．よって$t'u' < u't'$である．
+    したがってこの場合も$s \clt t'$, $t' \clt u'$, $u' \clt s$となるが，
+    帰納法の仮定からこのような$s, t', u'$は存在しない．
+  \end{enumerate}
+\end{proof}
+
+Totalityがあるので，以下のことを示せば推移性がいえる．
+\begin{lemma}
+  $s \cle t \cle u \cle s$ならば$s \ceq t \ceq u \ceq s$である\footnote{%
+    このとき$s \cle u$である．}．
+\end{lemma}
+\begin{proof}
+  上の補題より$s \clt t \clt u \clt s$とはならないので，
+  $s \cle t \cle u \cle s$のいずれかの$\cle$について
+  逆向きも成り立つ（つまり$\ceq$が成り立つ）．
+  $s \ceq t$として一般性を失わない．
+  $s = p^k$, $t = p^l$と書ける．このとき
+  $t \cle u$より$p^l u \le u p^l$であるから，これを繰り返し適用して
+  $p^{kl}u \le u p^{ul}$が成り立つ．
+  また，$u \cle s$から同様にして$u p^{kl} \le p^{kl} u$がいえる．
+  よって$u \ceq p^{kl}$だから$u$と$p^{kl}$は共通周期$q$をもつ．
+  するとある$m$があって$p^{kl} = q^m$だが，このとき$p$と$q$は共通周期$r$をもつ．
+  この$r$は$u$の周期にもなるから，
+  $r$は$s, t, u$の共通周期である．よって$s \ceq t \ceq u \ceq s$である．
+\end{proof}
+
+
+\subsection{ソートされていれば連結してできる文字列が同じであることの証明}
+
+一般にソートされた列は以下の形に表すことができる．
+\begin{displaymath}
+  t_{1,1}, \dots, t_{1,k_1}, t_{2,1}, \dots, t_{2, k_2}, \dots,
+  t_{l,1}, \dots, t_{l, k_l}
+\end{displaymath}
+ただし$1 \le j, k \le k_i$に対し$t_{i,j} \ceq t_{i,k}$である．
+$t_{i,1},\dots,t_{i,k_i}$を区間と呼ぶことにする．
+
+各区間内での並びは連結した結果には影響しないから，
+ソートのしかたが区間内での並び替えを除いて一意であることを示せば十分である．
+
+$t_{i,j}$とは別に$s$をソートした列$u$があるとして，それを上と同じように
+\begin{displaymath}
+  u_{1,1}, \dots, u_{1,m_1}, u_{2,1}, \dots, u_{2, m_2}, \dots,
+  u_{p,1}, \dots, u_{p,m_p}
+\end{displaymath}
+と書く．
+
+各$i$について$t_{1,i} = u_{j,k}$となる$j,k$が存在しなければならないが，
+$t_{1,i}$は$s$の中で$\cle$に関して最小だから$u_{j,k}$も最小でなければならない．
+つまり最初の区間に属していなければならないので$j=1$である．
+$t_{1,i}$と$u_{1,k}$を$t$, $u$からそれぞれ取り除いて同様の議論を繰り返すことで，
+$t$の各区間を並び替えて$u$の対応する区間と一致させられることが示せる．
+
+
+\subsection{辞書順最小であることの証明}
+
+$t_1, \dots, t_n$の連結が辞書順最小となるとする．
+もしある$i$について$t_{i+1} \clt t_i$となっていたら
+$t_i$と$t_{i+1}$を入れ替えることで辞書順でより小さい文字列が得られるから，
+$t_1 \cle \dots \cle t_n$でなければならない．
+よって，あるソートされた列が存在し，それを連結したものが辞書順最小である．
+
+ところで，ソートされているどんな二つの列も連結した結果は同じになるから，
+ソートされた任意の列を連結すれば辞書順最小の文字列が得られる．
+
+
+\subsection*{備考}
+
+\begin{enumerate}
+\item
+  Lexicographically smallest string obtained after concatenating array
+  \url{https://www.geeksforgeeks.org/lexicographically-smallest-string-obtained-concatenating-array/}
+\item
+  ABC042-B 文字列大好きいろはちゃんイージー \url{https://atcoder.jp/contests/abc042/tasks/abc042_b}
+  \begin{itemize}
+  \item この問題を解くこと自体はここで延べたことを使わなくてもできる．
+  \end{itemize}
+\item
+  ARC050-F Suffix Concat \url{https://atcoder.jp/contests/arc050/tasks/arc050_d}
+\end{enumerate}
 
 \end{document}
