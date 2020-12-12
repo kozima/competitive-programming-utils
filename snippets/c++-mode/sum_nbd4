@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: sum_nbd4
+# key: nbd
+# --
+template<typename T, typename Callback>
+inline T sum_nbd4(int x, int y, int lx, int ux, int ly, int uy, Callback f) {
+    constexpr pair<int, int> dxdy[] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+    T result{};
+    for (auto [dx, dy] : dxdy) {
+        const int u = x + dx, v = y + dy;
+        if (lx <= u && u < ux && ly <= v && v < uy) result += f(u, v);
+    }
+    return result;
+}
+template<typename T, typename Callback>
+inline T sum_nbd4(int x, int y, int X, int Y, Callback f) {
+    return sum_nbd4<T, Callback>(x, y, 0, X, 0, Y, f);
+}
