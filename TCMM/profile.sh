@@ -1,18 +1,17 @@
-name=
+NAME=
 
 if which pprof; then
-    if test ${name}.cpp -nt ${name}_prof; then
-        g++ -g --std=gnu++11 -O3 -o ${name}_prof -lprofiler -Wl,-no_pie ${name}.cpp
+    if test ${NAME}.cpp -nt ${NAME}_prof; then
+        g++ -g --std=gnu++11 -O3 -o ${NAME}_prof -lprofiler -Wl,-no_pie ${NAME}.cpp
     fi
-    env CPUPROFILE=${name}.prof ./${name}_prof 10 -b < testcases/2.txt > /dev/null
-    pprof --text ${name}_prof ${name}.prof
+    env CPUPROFILE=${NAME}.prof ./${NAME}_prof 10 -b < tests/2.in > /dev/null
+    pprof --text ${NAME}_prof ${NAME}.prof
 elif which gprof; then
-    if test ! -e ${name}_prof || test ${name}.cpp -nt ${name}_prof; then
-        g++ -pg --std=c++14 -lm -x c++ -O2 -o ${name}_prof ${name}.cpp
+    if test ! -e ${NAME}_prof || test ${NAME}.cpp -nt ${NAME}_prof; then
+        g++ -pg --std=c++14 -lm -x c++ -O2 -o ${NAME}_prof ${NAME}.cpp
     fi
 
-    ./${name}_prof 10 < input/2.txt > /dev/null #dense
-    # ./${name}_prof 10 < testcases/10.txt > /dev/null #sparse
+    ./${NAME}_prof 10 < tests/2.in > /dev/null
 
-    gprof ${name}_prof
+    gprof ${NAME}_prof
 fi
