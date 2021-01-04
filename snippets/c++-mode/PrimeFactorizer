@@ -1,0 +1,24 @@
+class PrimeFactorizer {
+    int *pf;
+public:
+    PrimeFactorizer(int n) : pf(new int[n+1]) {
+        fill(pf, pf+n+1, 1);
+        for (int p = 2; p <= n; p++)
+            if (pf[p] == 1) {
+                for (int q = p; q <= n; q += p)
+                    if (pf[q] == 1) pf[q] = p;
+            }
+    }
+    ~PrimeFactorizer() { delete[] pf; }
+    vector<pair<int, int> > factorize(int n) {
+        vector<pair<int, int> > result;
+        int p = -1;
+        while (n > 1) {
+            if (p == pf[n]) result.back().second++;
+            else result.emplace_back(pf[n], 1);
+            p = pf[n];
+            n /= p;
+        }
+        return result;
+    }
+};
