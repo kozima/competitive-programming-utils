@@ -414,6 +414,16 @@ public:
             data[x] = op(data[2*x+1], data[2*x+2]);
         }
     }
+    // pred(a[j-1]) && !pred(a[j])
+    template<typename Predicate>
+    int partition_point(Predicate p) {
+        int i = 0;
+        while (i < N - 1) {
+            if (p(data[2*i+1])) i = 2*i+2;
+            else i = 2*i+1;
+        }
+        return i - N + 1;
+    }
 };
 
 
