@@ -1,3 +1,4 @@
+#include <limits>
 #include <stack>
 #include <functional>
 #include <tuple>
@@ -388,6 +389,7 @@ class SegTree {
 public:
     explicit SegTree(int sz) : N(calc_size(sz)) {
         data = new T[2*N-1];
+        fill(data, data+2*N-1, unit);
     }
     ~SegTree() { delete[] data; }
     T query(int a, int b, int i = -1, int l = -1, int r = -1) const {
