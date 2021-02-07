@@ -64,7 +64,7 @@
   (when (and (eq major-mode 'c++-mode)
              (not buffer-read-only))
     (dolist (x '(("random" "mt19937")
-                 ("numeric" "accumulate" "iota")
+                 ("numeric" "accumulate" "iota" "gcd" "lcm")
                  ("iomanip" "setprecision" "setw" "setfill")
                  ("vector" "vector")
                  ("set" "set" "multiset")
@@ -87,6 +87,7 @@
                  ("functional" "function")
                  ("deque" "deque")
                  ("tuple" "tuple")
+                 ("limits" "numeric_limits")
                  ;; ("multiset" "multiset")
                  ))
       (let ((file (car x)) (regexp (concat "\\_<" (regexp-opt (cdr x)) "\\_>")))
@@ -100,6 +101,8 @@
             (when (re-search-forward regexp nil t)
               (goto-char (point-min))
               (unless (re-search-forward (format "^#include *<%s>" file) nil t)
+                (when (re-search-forward (format "^#include" file) nil t)
+                  (beginning-of-line 1))
                 (insert (format "#include <%s>\n" file))))))))
     (dolist (x '(("M_PI" . (lambda ()
                              (save-excursion
@@ -157,9 +160,42 @@
                     (mapconcat #'identity exprs " << ' ' << ")))
     (c-indent-line nil t)))
 
-(eval-after-load "cc-mode"
-  '(progn
-     (define-key c++-mode-map "\C-ci" 'mylib-cpp-insert-input)
-     (define-key c++-mode-map "\C-cI" 'mylib-cpp-insert-input-list)
-     (define-key c++-mode-map "\C-co" 'mylib-cpp-insert-output)
-     ))
+
+;;; todos(?)
+;;; - ファイルの配置，命名規則の指定方法
+;;; - キーバインドの設定
+;;; - 実行時エラーの場合に何が起きたかわかるようにするとよい
+;;; - サイトごと・言語ごとの profile を設定できるようにする
+;;; - コンパイル・実行スクリプトの管理
+
+(defun mylib-exec-test ()
+  (interactive)
+  (let* ((path buffer-file-name)
+         (file (file-name-nondirectory path))
+         (directory (file-name-directory path))
+         (name (and (string-match "\\(.*\\)\\.\\([a-zA-Z0-9]*\\)$" file)
+                    (match-string 1 file)))
+         (type (match-string 2 file)))
+    (when (buffer-modified-p) (save-buffer))
+    (cond ((and (string-match "/pg/contest/cf/" directory)
+                (string= "java" type))
+           (compile (concat "cfchk-java " name)))
+          ((and (string-match "/pg/contest/cf/" directory)
+                (string= "hs" type))
+           (compile (concat "cfchk-haskell " name)))
+          ((and (string-match "/pg/contest/cf/" directory)
+                (string= "cpp" type))
+           (cf-download-examples nil)
+           (compile (concat "cfchk-cpp " name)))
+          ((and (string-match "/pg/contest/atc/" directory)
+                (string= "gentest.cpp" file))
+           (compile (concat "g++ -std=gnu++1y -o gentest -O2 -I/opt/boost/gcc/include -L/opt/boost/gcc/lib " file " && ./gentest > test")))
+          ((and (string-match "/pg/contest/atc/" directory)
+                (string= "cpp" type))
+           (atcoder-download-examples nil)
+           (compile (concat "atcchk-cpp -d " name)))
+          ((and (string-match "/pg/contest/atc/" directory)
+                (string= "rs" type))
+           (atcoder-download-examples nil)
+           (compile (concat "atcchk-rs " name))))))
+
