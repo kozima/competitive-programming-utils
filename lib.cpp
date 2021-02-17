@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include <limits>
 #include <stack>
 #include <functional>
@@ -1349,4 +1350,47 @@ int det_mod(vector<vector<int> >& m) {
         }
     }
     return result;
+}
+
+// all i s.t. x^i = y mod p and 0 <= i < p-1
+vector<int> discrete_log_all(int x, int y, int p) {
+    const int s = ceil(sqrt(p));
+    unordered_map<int, vector<int> > dlog(s);
+    vector<int> result;
+    long long pw = 1;
+    for (int i = 0; i < s; i++) {
+        dlog[pw].push_back(i);
+        pw = pw * x % p;
+    }
+    const long long q = modexp(pw, p-2, p);
+    for (long long qq = 1, j = 0; j * s < p; j++, qq = qq * q % p) {
+        int t = qq * y % p;
+        if (auto it = dlog.find(t); it != dlog.end()) {
+            for (int i : it->second) {
+                int l = (j * s + i);
+                assert(modexp(x, l, p) == y);
+                if (l < p - 1)
+                    result.push_back(l);
+            }
+        }
+    }
+    return result;
+}
+
+// some i s.t. x^i = y mod p and 0 <= i < p-1; -1 if there is no such i
+int discrete_log(int x, int y, int p) {
+    const int s = ceil(sqrt(p));
+    unordered_map<int, int> dlog(s);
+    long long pw = 1;
+    for (int i = 0; i < s; i++) {
+        dlog[pw] = i;
+        pw = pw * x % p;
+    }
+    const long long q = modexp(pw, p-2, p);
+    for (long long qq = 1, j = 0; j * s < p; j++, qq = qq * q % p) {
+        const int t = qq * y % p;
+        if (auto it = dlog.find(t); it != dlog.end())
+            return j * s + it->second;
+    }
+    return -1;
 }
