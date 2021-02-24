@@ -392,6 +392,13 @@ public:
         data = new T[2*N-1];
         fill(data, data+2*N-1, unit);
     }
+    template<typename Iterator>
+    explicit SegTree(Iterator first, Iterator last) : N(calc_size(last - first)) {
+        data = new T[2*N-1];
+        copy(first, last, data+N-1);
+        for (int i = N-2; i >= 0; i--)
+            data[i] = op(data[2*i+1], data[2*i+2]);
+    }
     ~SegTree() { delete[] data; }
     T query(int a, int b, int i = -1, int l = -1, int r = -1) const {
         if (i == -1) { i = 0; l = 0; r = N; }
@@ -1195,40 +1202,66 @@ vector<pair<int, int> > bridges(vector<vector<int>> &adj) {
 }
 
 // SCC
-// returns: node -> index of its component
-vector<int> scc(const vector<vector<int>> &adj) {
-    const int n = adj.size();
-    vector<int> low(n), disc(n, -1), comp(n);
-    vector<bool> finished(n, false);
-    stack<int> st;
-    int count = 0, cidx = 0;
-    function<void(int)> dfs = [&](int i) {
-        low[i] = disc[i] = count++;
-        st.push(i);
-        for (int j : adj[i]) {
-            if (disc[j] == -1) {
-                dfs(j);
-                low[i] = min(low[i], low[j]);
-            } else if (!finished[j]) {
-                low[i] = min(low[i], disc[j]);
+// comp: node -> index of its component
+// exists an edge from component i to component j ==> i > j
+class SCC {
+    const vector<vector<int>> adj;
+    vector<int> comp;
+    int comp_count;
+    void build_components() {
+        const int n = adj.size();
+        vector<int> low(n), disc(n, -1);
+        comp.resize(n);
+        vector<bool> finished(n, false);
+        stack<int> st;
+        int count = 0, cidx = 0;
+        function<void(int)> dfs = [&](int i) {
+            low[i] = disc[i] = count++;
+            st.push(i);
+            for (int j : adj[i]) {
+                if (disc[j] == -1) {
+                    dfs(j);
+                    low[i] = min(low[i], low[j]);
+                } else if (!finished[j]) {
+                    low[i] = min(low[i], disc[j]);
+                }
             }
-        }
 
-        if (low[i] == disc[i]) {
-            for (;;) {
-                int x = st.top();
-                st.pop();
-                finished[x] = true;
-                comp[x] = cidx;
-                if (x == i) break;
+            if (low[i] == disc[i]) {
+                for (;;) {
+                    int x = st.top();
+                    st.pop();
+                    finished[x] = true;
+                    comp[x] = cidx;
+                    if (x == i) break;
+                }
+                cidx++;
             }
-            cidx++;
-        }
-    };
-    for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i);
+        };
+        for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i);
+        comp_count = cidx;
+    }
 
-    return comp;
-}
+public:
+    SCC(const vector<vector<int>>& adj) : adj(adj) {
+        build_components();
+    }
+    vector<int> get_comp() { return comp; }
+    int get_comp_count() { return comp_count; }
+    vector<vector<int> > make_adj_list() {
+        vector<vector<int> > adj2(comp_count);
+        for (size_t i = 0; i < adj.size(); i++)
+            for (int j : adj[i]) {
+                assert(comp[i] >= comp[j]);
+                if (comp[i] != comp[j]) adj2[comp[i]].push_back(comp[j]);
+            }
+        for (vector<int>& v : adj2) {
+            sort(v.begin(), v.end());
+            v.erase(unique(v.begin(), v.end()), v.end());
+        }
+        return adj2;
+    }
+};
 
 
 // fast zeta/Moebius transform
