@@ -99,6 +99,17 @@ long long CRT(long long a, long long x, long long b, long long y) {
     return ans;
 }
 
+// ax = b mod m
+long long mod_linear_eqn(long long a, long long b, long long m) {
+    long long g = gcd(a, m);
+    if (b % g != 0) return -1;
+    a /= g; b /= g; m /= g;
+    long long ainv = modinv(a, m);
+    long long ans = b * ainv % m;
+    if (ans < 0) ans += m;
+    assert((a * ans - b) % m == 0);
+    return ans;
+}
 
 // floor(a/b)
 long long floor(long long a, long long b) {
