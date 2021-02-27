@@ -1427,3 +1427,25 @@ int discrete_log(int x, int y, int p) {
     }
     return -1;
 }
+
+// primitive root
+int primitive_root(int p) {
+    if (p == 2) return 1;
+    vector<int> divs;
+    int x = p-1;
+    for (int d = 2; d * d <= x; d++) {
+        if (x % d == 0) {
+            divs.push_back((p - 1) / d);
+            do { x /= d; } while (x % d == 0);
+        }
+    }
+    if (x > 1) divs.push_back((p - 1) / x);
+    for (int i = 2; ; i++) {
+        assert(i < p);
+        bool ok = true;
+        for (int d : divs) {
+            if (modexp(i, d, p) == 1) { ok = false; break; }
+        }
+        if (ok) return i;
+    }
+}
