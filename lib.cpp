@@ -1185,6 +1185,41 @@ vector<int> articulation_points(vector<vector<int>> &adj) {
     return aps;
 }
 
+// binocnnected components
+vector<vector<pair<int, int> > >
+biconnected_components(const vector<vector<int> > &adj) {
+    const int n = adj.size();
+    int t = 0;
+    vector<int> disc(n, -1), low(n);
+    vector<vector<pair<int, int> > > comps;
+    stack<pair<int, int> > st;
+    function<void(int, int)> dfs = [&](int i, int p) {
+        low[i] = disc[i] = t++;
+        for (int j : adj[i]) {
+            if (j == p) continue;
+            if (disc[j] < disc[i]) st.emplace(min(i, j), max(i, j));
+            if (disc[j] == -1) {
+                dfs(j, i);
+                low[i] = min(low[i], low[j]);
+                if (low[j] >= disc[i]) {
+                    vector<pair<int, int> >& comp = comps.emplace_back();
+                    for (;;) {
+                        auto [u, v] = st.top();
+                        st.pop();
+                        comp.emplace_back(u, v);
+                        if (u == min(i, j) && v == max(i, j))
+                            break;
+                    }
+                }
+            } else {
+                low[i] = min(low[i], disc[j]);
+            }
+        }
+    };
+
+    for (int i = 0; i < n; i++) if (disc[i] == -1) dfs(i, -1);
+    return comps;
+}
 
 // bridges
 vector<pair<int, int> > bridges(vector<vector<int>> &adj) {
