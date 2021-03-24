@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <cassert>
 #include <chrono>
 
@@ -37,3 +38,7 @@ public:
   }
 } timer;
 
+int main(int argc, char** argv) {
+    if (argc > 1) timelimit = atoi(argv[1]) * 1000;
+
+}
