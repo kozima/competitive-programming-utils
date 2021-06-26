@@ -1,0 +1,9 @@
+class Timer {
+  chrono::system_clock::time_point start_time = chrono::system_clock::now();
+public:
+  Timer() {}
+  int get_elapsed_time() {
+    auto diff = chrono::system_clock::now() - start_time;
+    return chrono::duration_cast<chrono::milliseconds>(diff).count();
+  }
+} timer;

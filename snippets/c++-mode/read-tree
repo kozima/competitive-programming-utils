@@ -2,6 +2,7 @@
 # name: read-tree
 # key: read-tree
 # --
+vector<vector<int> > adj(n);
 for (int i = 1; i < n; i++) {
     int u, v; cin >> u >> v;
     u--; v--;
